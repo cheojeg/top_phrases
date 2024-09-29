@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS phrases;
+DROP TABLE IF EXISTS phrase_states;
+DROP TABLE IF EXISTS users;
