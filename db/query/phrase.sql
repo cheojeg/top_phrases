@@ -7,6 +7,19 @@ INSERT INTO phrases (
 
 -- name: UpdatePhraseState :one
 UPDATE phrases
-SET state = $2, published_at = $3
+SET state = $2
 WHERE id = $1
 RETURNING *;
+
+-- name: UpdatePhrase :one
+UPDATE phrases
+SET phrase = $2, author = $3
+WHERE id = $1
+RETURNING *;
+
+-- name: GetPhraseToPublish :one
+SELECT *
+FROM phrases
+WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '$1 days'
+ORDER BY RANDOM()
+LIMIT 1;

@@ -2,7 +2,6 @@ package api
 
 import (
 	db "github.com/cheojeg/top_phrases/db/sqlc"
-	"github.com/cheojeg/top_phrases/db/util"
 	"github.com/cheojeg/top_phrases/token"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -53,8 +52,8 @@ func (server *Server) createPhrase(ctx *gin.Context) {
 }
 
 type updatePhraseStateRequest struct {
-	ID    int64  `json:"id"`
-	State string `json:"state"`
+	ID    int64  `json:"id" binding:"required"`
+	State string `json:"state" binding:"required"`
 }
 
 func (server *Server) updatePhraseState(ctx *gin.Context) {
@@ -68,11 +67,42 @@ func (server *Server) updatePhraseState(ctx *gin.Context) {
 		ID:    req.ID,
 		State: req.State,
 	}
-	if req.State == publishedPhraseState {
-		arg.PublishedAt = util.ConvertTimeToNullTime(time.Now())
+	phrase, err := server.store.UpdatePhraseState(ctx, arg)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 
-	phrase, err := server.store.UpdatePhraseState(ctx, arg)
+	ctx.JSON(http.StatusOK, phrase)
+}
+
+type updatePhraseRequest struct {
+	ID     int64  `json:"id" binding:"required"`
+	Phrase string `json:"phrase" binding:"required"`
+	Author string `json:"author"`
+}
+
+func (server *Server) updatePhrase(ctx *gin.Context) {
+	var req updatePhraseRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdatePhraseParams{
+		ID:     req.ID,
+		Phrase: req.Phrase,
+		Author: req.Author,
+	}
+
+	phrase, err := server.store.UpdatePhrase(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {

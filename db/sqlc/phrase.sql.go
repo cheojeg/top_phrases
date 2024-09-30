@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -48,21 +47,71 @@ func (q *Queries) CreatePhrase(ctx context.Context, arg CreatePhraseParams) (Phr
 	return i, err
 }
 
+const getPhraseToPublish = `-- name: GetPhraseToPublish :one
+SELECT id, owner, state, phrase, author, created_at, published_at
+FROM phrases
+WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '$1 days'
+ORDER BY RANDOM()
+LIMIT 1
+`
+
+func (q *Queries) GetPhraseToPublish(ctx context.Context) (Phrase, error) {
+	row := q.db.QueryRowContext(ctx, getPhraseToPublish)
+	var i Phrase
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.State,
+		&i.Phrase,
+		&i.Author,
+		&i.CreatedAt,
+		&i.PublishedAt,
+	)
+	return i, err
+}
+
+const updatePhrase = `-- name: UpdatePhrase :one
+UPDATE phrases
+SET phrase = $2, author = $3
+WHERE id = $1
+RETURNING id, owner, state, phrase, author, created_at, published_at
+`
+
+type UpdatePhraseParams struct {
+	ID     int64  `json:"id"`
+	Phrase string `json:"phrase"`
+	Author string `json:"author"`
+}
+
+func (q *Queries) UpdatePhrase(ctx context.Context, arg UpdatePhraseParams) (Phrase, error) {
+	row := q.db.QueryRowContext(ctx, updatePhrase, arg.ID, arg.Phrase, arg.Author)
+	var i Phrase
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.State,
+		&i.Phrase,
+		&i.Author,
+		&i.CreatedAt,
+		&i.PublishedAt,
+	)
+	return i, err
+}
+
 const updatePhraseState = `-- name: UpdatePhraseState :one
 UPDATE phrases
-SET state = $2, published_at = $3
+SET state = $2
 WHERE id = $1
 RETURNING id, owner, state, phrase, author, created_at, published_at
 `
 
 type UpdatePhraseStateParams struct {
-	ID          int64        `json:"id"`
-	State       string       `json:"state"`
-	PublishedAt sql.NullTime `json:"published_at"`
+	ID    int64  `json:"id"`
+	State string `json:"state"`
 }
 
 func (q *Queries) UpdatePhraseState(ctx context.Context, arg UpdatePhraseStateParams) (Phrase, error) {
-	row := q.db.QueryRowContext(ctx, updatePhraseState, arg.ID, arg.State, arg.PublishedAt)
+	row := q.db.QueryRowContext(ctx, updatePhraseState, arg.ID, arg.State)
 	var i Phrase
 	err := row.Scan(
 		&i.ID,

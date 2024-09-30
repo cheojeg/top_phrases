@@ -40,6 +40,7 @@ func (server *Server) setupRouter() {
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	authRoutes.POST("/phrase", server.createPhrase)
+	authRoutes.PUT("/phrase", server.updatePhrase)
 	authRoutes.PUT("/phrase_state", server.updatePhraseState)
 	//authRoutes.GET("/accounts/:id", server.getAccount)
 	//authRoutes.GET("/accounts", server.listAccount)
