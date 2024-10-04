@@ -1,7 +1,7 @@
 package token
 
 import (
-	"github.com/cheojeg/simplebank/db/util"
+	"github.com/cheojeg/top_phrases/db/util"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/require"
 	"testing"

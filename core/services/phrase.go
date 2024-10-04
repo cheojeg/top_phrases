@@ -52,7 +52,8 @@ func formatMessage(phrase db.Phrase) string {
 }
 
 func (s *Service) GetPhraseToPublish(ctx context.Context) (string, error) {
-	phrase, _ := s.store.GetPhraseToPublish(ctx)
+	phrase, _ := s.store.GetPhraseToPublish(ctx, 5)
+	_, _ = s.store.UpdatePublishedAt(ctx, phrase.ID)
 	fmt.Println(phrase)
 	// TODO - Update last published at date
 	//phraseToPublish := domain.Phrase{

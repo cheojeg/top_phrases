@@ -50,13 +50,13 @@ func (q *Queries) CreatePhrase(ctx context.Context, arg CreatePhraseParams) (Phr
 const getPhraseToPublish = `-- name: GetPhraseToPublish :one
 SELECT id, owner, state, phrase, author, created_at, published_at
 FROM phrases
-WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '$1 days'
+WHERE published_at IS NULL OR published_at < NOW() - INTERVAL $1 + ' days'
 ORDER BY RANDOM()
 LIMIT 1
 `
 
-func (q *Queries) GetPhraseToPublish(ctx context.Context) (Phrase, error) {
-	row := q.db.QueryRowContext(ctx, getPhraseToPublish)
+func (q *Queries) GetPhraseToPublish(ctx context.Context, dollar_1 int64) (Phrase, error) {
+	row := q.db.QueryRowContext(ctx, getPhraseToPublish, dollar_1)
 	var i Phrase
 	err := row.Scan(
 		&i.ID,
@@ -112,6 +112,28 @@ type UpdatePhraseStateParams struct {
 
 func (q *Queries) UpdatePhraseState(ctx context.Context, arg UpdatePhraseStateParams) (Phrase, error) {
 	row := q.db.QueryRowContext(ctx, updatePhraseState, arg.ID, arg.State)
+	var i Phrase
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.State,
+		&i.Phrase,
+		&i.Author,
+		&i.CreatedAt,
+		&i.PublishedAt,
+	)
+	return i, err
+}
+
+const updatePublishedAt = `-- name: UpdatePublishedAt :one
+UPDATE phrases
+SET published_at = NOW()
+WHERE id = $1
+RETURNING id, owner, state, phrase, author, created_at, published_at
+`
+
+func (q *Queries) UpdatePublishedAt(ctx context.Context, id int64) (Phrase, error) {
+	row := q.db.QueryRowContext(ctx, updatePublishedAt, id)
 	var i Phrase
 	err := row.Scan(
 		&i.ID,

@@ -20,6 +20,12 @@ RETURNING *;
 -- name: GetPhraseToPublish :one
 SELECT *
 FROM phrases
-WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '$1 days'
+WHERE published_at IS NULL OR published_at < NOW() - INTERVAL $1 + ' days'
 ORDER BY RANDOM()
 LIMIT 1;
+
+-- name: UpdatePublishedAt :one
+UPDATE phrases
+SET published_at = NOW()
+WHERE id = $1
+RETURNING *;
