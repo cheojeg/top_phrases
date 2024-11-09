@@ -148,3 +148,73 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 
 }
+
+type loginUserWebRequest struct {
+	Username string `form:"username" binding:"required,alphanum"`
+	Password string `form:"password" binding:"required,min=6"`
+}
+
+func (server *Server) loginUserWeb(ctx *gin.Context) {
+	var req loginUserWebRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := server.store.GetUser(ctx, req.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	if err = util.CheckPassword(req.Password, user.HashedPassword); err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	//accessToken, accessTokenPayload, errToken := server.tokenMaker.CreateToken(user.Username, "", server.config.AccessTokenDuration)
+	//if errToken != nil {
+	//	ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	//	return
+	//}
+
+	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(user.Username, "", server.config.RefreshTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	_, err = server.store.CreateSession(ctx, db.CreateSessionParams{
+		ID:           refreshTokenPayload.ID,
+		Username:     user.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.GetHeader("User-Agent"),
+		ClientIp:     ctx.ClientIP(),
+		IsBlocked:    false,
+		ExpiresAt:    refreshTokenPayload.ExpiredAt,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	//rsp := loginUserResponse{
+	//	SessionID:             session.ID,
+	//	AccessToken:           accessToken,
+	//	AccessTokenExpiresAt:  accessTokenPayload.ExpiredAt,
+	//	RefreshToken:          refreshToken,
+	//	RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
+	//	User:                  newUserResponse(user),
+	//}
+
+	//ctx.JSON(http.StatusOK, rsp)
+	// Set the HX-Redirect header
+	ctx.Header("HX-Redirect", "/quotes")
+	ctx.JSON(http.StatusFound, gin.H{
+		"message": "Request received successfully",
+	})
+}

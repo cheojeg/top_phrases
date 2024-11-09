@@ -6,6 +6,9 @@ import (
 	"github.com/cheojeg/top_phrases/db/util"
 	"github.com/cheojeg/top_phrases/token"
 	"github.com/gin-gonic/gin"
+	"path/filepath"
+
+	"github.com/gin-contrib/multitemplate"
 )
 
 type Server struct {
@@ -31,10 +34,34 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	return server, nil
 }
 
+func loadTemplates(templatesDir string) multitemplate.Renderer {
+	r := multitemplate.NewRenderer()
+
+	layouts, err := filepath.Glob(templatesDir + "/layouts/*.html")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	includes, err := filepath.Glob(templatesDir + "/includes/*.html")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Generate our templates map from our layouts/ and includes/ directories
+	for _, include := range includes {
+		layoutCopy := make([]string, len(layouts))
+		copy(layoutCopy, layouts)
+		layoutCopy = append(layoutCopy, include)
+		r.AddFromFiles(filepath.Base(include), layoutCopy...)
+	}
+	return r
+}
+
 func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
+	router.POST("/users/login_web", server.loginUserWeb)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
@@ -45,9 +72,10 @@ func (server *Server) setupRouter() {
 	//authRoutes.GET("/accounts", server.listAccount)
 	//
 	//authRoutes.POST("/transfers", server.createTransfer)
-
-	router.LoadHTMLGlob("templates/*")
+	//router.LoadHTMLGlob(filepath.Join("templates", "*.html"))
+	router.HTMLRender = loadTemplates("./templates")
 	router.GET("/", server.index)
+	router.GET("/quotes", server.quotes)
 	server.router = router
 }
 
