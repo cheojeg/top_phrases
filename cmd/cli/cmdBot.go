@@ -18,7 +18,7 @@ import (
 func newCmdBot() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bot",
-		Short: "Starts the API server",
+		Short: "Starts the bot server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			config, err := util.LoadConfig(".")

@@ -23,10 +23,11 @@ import (
 
 func NewCmdRoot() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "Top Phrases",
+		Use:   "Top Quotes",
 		Short: "Root command",
 	}
 
 	cmd.AddCommand(newCmdBot())
+	cmd.AddCommand(newCmdApi())
 	return cmd
 }

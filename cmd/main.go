@@ -8,6 +8,6 @@ import (
 func main() {
 	rootCmd := cli.NewCmdRoot()
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println("error starting sign_guard")
+		fmt.Println("error starting top_quotes:", err)
 	}
 }

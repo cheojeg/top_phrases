@@ -38,7 +38,6 @@ func (server *Server) setupRouter() {
 	router.POST("/tokens/renew_access", server.renewAccessToken)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-
 	authRoutes.POST("/phrase", server.createPhrase)
 	authRoutes.PUT("/phrase", server.updatePhrase)
 	authRoutes.PUT("/phrase_state", server.updatePhraseState)
@@ -46,6 +45,9 @@ func (server *Server) setupRouter() {
 	//authRoutes.GET("/accounts", server.listAccount)
 	//
 	//authRoutes.POST("/transfers", server.createTransfer)
+
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/", server.index)
 	server.router = router
 }
 
