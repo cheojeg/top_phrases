@@ -176,11 +176,11 @@ func (server *Server) loginUserWeb(ctx *gin.Context) {
 		return
 	}
 
-	//accessToken, accessTokenPayload, errToken := server.tokenMaker.CreateToken(user.Username, "", server.config.AccessTokenDuration)
-	//if errToken != nil {
-	//	ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-	//	return
-	//}
+	accessToken, _, errToken := server.tokenMaker.CreateToken(user.Username, "", server.config.AccessTokenDuration)
+	if errToken != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
 
 	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(user.Username, "", server.config.RefreshTokenDuration)
 	if err != nil {
@@ -202,19 +202,15 @@ func (server *Server) loginUserWeb(ctx *gin.Context) {
 		return
 	}
 
-	//rsp := loginUserResponse{
-	//	SessionID:             session.ID,
-	//	AccessToken:           accessToken,
-	//	AccessTokenExpiresAt:  accessTokenPayload.ExpiredAt,
-	//	RefreshToken:          refreshToken,
-	//	RefreshTokenExpiresAt: refreshTokenPayload.ExpiredAt,
-	//	User:                  newUserResponse(user),
-	//}
-
-	//ctx.JSON(http.StatusOK, rsp)
-	// Set the HX-Redirect header
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "authorization",
+		Value:    "bearer " + accessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+	})
 	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusFound, gin.H{
-		"message": "Request received successfully",
+		"authentication": accessToken,
 	})
 }

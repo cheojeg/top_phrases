@@ -70,6 +70,41 @@ func (q *Queries) GetPhraseToPublish(ctx context.Context) (Phrase, error) {
 	return i, err
 }
 
+const listPhrases = `-- name: ListPhrases :many
+SELECT id, owner, state, phrase, author, created_at, published_at FROM phrases
+`
+
+func (q *Queries) ListPhrases(ctx context.Context) ([]Phrase, error) {
+	rows, err := q.db.QueryContext(ctx, listPhrases)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Phrase{}
+	for rows.Next() {
+		var i Phrase
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.State,
+			&i.Phrase,
+			&i.Author,
+			&i.CreatedAt,
+			&i.PublishedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updatePhrase = `-- name: UpdatePhrase :one
 UPDATE phrases
 SET phrase = $2, author = $3
@@ -125,24 +160,40 @@ func (q *Queries) UpdatePhraseState(ctx context.Context, arg UpdatePhraseStatePa
 	return i, err
 }
 
-const updatePublishedAt = `-- name: UpdatePublishedAt :one
+const updatePublishedAt = `-- name: UpdatePublishedAt :many
 UPDATE phrases
 SET published_at = NOW()
 WHERE id = $1
 RETURNING id, owner, state, phrase, author, created_at, published_at
 `
 
-func (q *Queries) UpdatePublishedAt(ctx context.Context, id int64) (Phrase, error) {
-	row := q.db.QueryRowContext(ctx, updatePublishedAt, id)
-	var i Phrase
-	err := row.Scan(
-		&i.ID,
-		&i.Owner,
-		&i.State,
-		&i.Phrase,
-		&i.Author,
-		&i.CreatedAt,
-		&i.PublishedAt,
-	)
-	return i, err
+func (q *Queries) UpdatePublishedAt(ctx context.Context, id int64) ([]Phrase, error) {
+	rows, err := q.db.QueryContext(ctx, updatePublishedAt, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Phrase{}
+	for rows.Next() {
+		var i Phrase
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.State,
+			&i.Phrase,
+			&i.Author,
+			&i.CreatedAt,
+			&i.PublishedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

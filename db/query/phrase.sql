@@ -24,8 +24,12 @@ WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '15 days'
 ORDER BY RANDOM()
 LIMIT 1;
 
--- name: UpdatePublishedAt :one
+-- name: UpdatePublishedAt :many
 UPDATE phrases
 SET published_at = NOW()
 WHERE id = $1
 RETURNING *;
+
+
+-- name: ListPhrases :many
+SELECT * FROM phrases;

@@ -68,14 +68,11 @@ func (server *Server) setupRouter() {
 	authRoutes.POST("/phrase", server.createPhrase)
 	authRoutes.PUT("/phrase", server.updatePhrase)
 	authRoutes.PUT("/phrase_state", server.updatePhraseState)
-	//authRoutes.GET("/accounts/:id", server.getAccount)
-	//authRoutes.GET("/accounts", server.listAccount)
-	//
-	//authRoutes.POST("/transfers", server.createTransfer)
-	//router.LoadHTMLGlob(filepath.Join("templates", "*.html"))
+	authRoutes.GET("/quotes", server.quotes)
+
 	router.HTMLRender = loadTemplates("./templates")
 	router.GET("/", server.index)
-	router.GET("/quotes", server.quotes)
+
 	server.router = router
 }
 

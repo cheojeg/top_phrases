@@ -17,9 +17,10 @@ type Querier interface {
 	GetPhraseToPublish(ctx context.Context) (Phrase, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUser(ctx context.Context, username string) (User, error)
+	ListPhrases(ctx context.Context) ([]Phrase, error)
 	UpdatePhrase(ctx context.Context, arg UpdatePhraseParams) (Phrase, error)
 	UpdatePhraseState(ctx context.Context, arg UpdatePhraseStateParams) (Phrase, error)
-	UpdatePublishedAt(ctx context.Context, id int64) (Phrase, error)
+	UpdatePublishedAt(ctx context.Context, id int64) ([]Phrase, error)
 }
 
 var _ Querier = (*Queries)(nil)

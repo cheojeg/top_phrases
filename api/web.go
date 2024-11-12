@@ -1,6 +1,7 @@
 package api
 
 import (
+	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,12 +17,24 @@ type Quote struct {
 	Author string
 }
 
-func (server *Server) quotes(ctx *gin.Context) {
-	quotes := []Quote{
-		{Text: "The only limit to our realization of tomorrow is our doubts of today.", Author: "Franklin D. Roosevelt"},
-		{Text: "The purpose of our lives is to be happy.", Author: "Dalai Lama"},
-		{Text: "Life is what happens when you're busy making other plans.", Author: "John Lennon"},
+func parseQuotes(phrases []db.Phrase) []Quote {
+	quotes := make([]Quote, len(phrases))
+	for i, phrase := range phrases {
+		quotes[i] = Quote{
+			Text:   phrase.Phrase,
+			Author: phrase.Author,
+		}
 	}
+	return quotes
+}
+
+func (server *Server) quotes(ctx *gin.Context) {
+	quotesQuery, err := server.store.ListPhrases(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	quotes := parseQuotes(quotesQuery)
 	ctx.HTML(http.StatusOK, "quotes.html", gin.H{
 		"title":  "Quotes",
 		"Quotes": quotes,

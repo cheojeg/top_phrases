@@ -18,6 +18,17 @@ const (
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+
+		// Check if the authorization header comes from cookie
+		if len(authorizationHeader) == 0 {
+			auth, err := ctx.Cookie("authorization")
+			if err != nil {
+				authorizationHeader = ""
+			} else {
+				authorizationHeader = auth
+			}
+		}
+
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header is not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))

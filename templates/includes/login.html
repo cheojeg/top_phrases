@@ -1,14 +1,14 @@
 {{define "content"}}
 <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
     <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
-    <form hx-post="/users/login_web">
+    <form hx-post="/users/login_web" hx-trigger="submit" hx-swap="none">
         <div class="mb-4">
             <label for="username" class="block text-gray-700">Username:</label>
-            <input type="text" id="username" name="username" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="username" name="username" value="edgarignacio" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div class="mb-6">
             <label for="password" class="block text-gray-700">Password:</label>
-            <input type="password" id="password" name="password" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="password" id="password" value="j9174697" name="password" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Login</button>
     </form>
