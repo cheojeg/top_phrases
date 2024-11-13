@@ -1,0 +1,24 @@
+{{define "content"}}
+<div class="container mx-auto p-4">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-lg">
+        <div class="md:flex">
+            <div class="w-full p-4">
+                <h2 class="text-2xl font-bold text-gray-700 text-center">Create Quote</h2>
+                <form action="/phrase" method="POST" class="mt-4">
+                    <div class="mb-4">
+                        <label for="text" class="block text-gray-700">Quote</label>
+                        <textarea id="text" name="text" rows="4" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:shadow-outline" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="author" class="block text-gray-700">Author</label>
+                        <input type="text" id="author" name="author" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="flex items-center justify-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:shadow-outline">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
