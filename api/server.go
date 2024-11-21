@@ -70,8 +70,8 @@ func (server *Server) setupRouter() {
 	authRoutes.PUT("/phrase_state", server.updatePhraseState)
 	authRoutes.GET("/quotes", server.quotes)
 	authRoutes.GET("/create_quote", server.createQuote)
-	authRoutes.POST("/create_quote", server.createQuoteWeb)
 	authRoutes.GET("/edit_quote/:id", server.editQuoteWeb)
+	authRoutes.GET("/inbox", server.inboxQuotes)
 	authRoutes.GET("/update_state_quote/:id", server.updateStateQuoteWeb)
 
 	router.HTMLRender = loadTemplates("./templates")

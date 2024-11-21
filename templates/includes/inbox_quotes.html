@@ -1,0 +1,29 @@
+{{define "content"}}
+{{block "sidebar" .}} {{end}}
+<main class="container mx-auto p-4">
+  <h1> Frase del dia </h1>
+  {{range .Quotes}}
+  <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6  mb-3 mt-3">
+    <ul class="space-y-4">
+      <li>
+        {{ if eq .State "draft" }}
+        <span class="bg-yellow-100 text-yellow-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">Draft</span>
+        {{ else if eq .State "published" }}
+        <span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Published</span>
+        {{ else if eq .State "archived" }}
+        <span class="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Archived</span>
+        {{ end }}
+        <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Text }}"</blockquote>
+        <p class="text-lg text-gray-600 text-right">- {{ .Author }}</p>
+        <a href="/edit_quote/{{.ID}}">Editar</a>
+        <br>
+        <div class="flex justify-end space-x-2">
+          <button hx-put="/phrase_state" hx-ext="json-enc" hx-vals='{"id": {{.ID}}, "state": "archived"}' hx-trigger="click" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Archivar</button>
+          <button hx-put="/phrase_state" hx-ext="json-enc" hx-vals='{"id": {{.ID}}, "state": "published"}' hx-trigger="click" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Publicar</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+  {{end}}
+</main>
+{{end}}

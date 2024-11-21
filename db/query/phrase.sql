@@ -42,3 +42,8 @@ WHERE id = $1;
 SELECT COUNT(*)
 FROM phrases
 WHERE state = 'draft';
+
+-- name: ListPhrasesByState :many
+SELECT *
+FROM phrases
+WHERE state = $1;

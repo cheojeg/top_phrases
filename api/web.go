@@ -1,13 +1,10 @@
 package api
 
 import (
-	"database/sql"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
-	"github.com/cheojeg/top_phrases/token"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 func (server *Server) index(ctx *gin.Context) {
@@ -56,43 +53,17 @@ func (server *Server) quotes(ctx *gin.Context) {
 }
 
 func (server *Server) createQuote(ctx *gin.Context) {
-	ctx.Header("HX-Redirect", "/create_quote")
-	ctx.HTML(http.StatusOK, "create_quote.html", gin.H{
-		"title": "Crear Frase",
-	})
-}
-
-type createQuoteRequest struct {
-	Quote  string `form:"quote" binding:"required"`
-	Author string `form:"author"`
-}
-
-func (server *Server) createQuoteWeb(ctx *gin.Context) {
-	var req createQuoteRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	arg := db.CreatePhraseParams{
-		Owner:     authPayload.Username,
-		State:     draftPhraseState,
-		Phrase:    req.Quote,
-		Author:    req.Author,
-		CreatedAt: time.Now(),
-	}
-
-	_, err := server.store.CreatePhrase(ctx, arg)
+	countDraft, err := server.store.CountDraftPhrases(ctx)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.Header("HX-Redirect", "/quotes")
+
+	ctx.Header("HX-Redirect", "/create_quote")
+	ctx.HTML(http.StatusOK, "create_quote.html", gin.H{
+		"title":   "Crear Frase",
+		"Pending": countDraft,
+	})
 }
 
 func (server *Server) editQuoteWeb(ctx *gin.Context) {
@@ -113,10 +84,18 @@ func (server *Server) editQuoteWeb(ctx *gin.Context) {
 		Author: phrase.Author,
 		State:  phrase.State,
 	}
+
+	countDraft, err := server.store.CountDraftPhrases(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	//quotes := parseQuotes(quotesQuery)
 	ctx.HTML(http.StatusOK, "edit_quote.html", gin.H{
-		"title": "Edit Quote",
-		"Quote": quote,
+		"title":   "Edit Quote",
+		"Quote":   quote,
+		"Pending": countDraft,
 	})
 }
 
@@ -138,9 +117,36 @@ func (server *Server) updateStateQuoteWeb(ctx *gin.Context) {
 		Author: phrase.Author,
 		State:  phrase.State,
 	}
+
+	countDraft, err := server.store.CountDraftPhrases(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	//quotes := parseQuotes(quotesQuery)
 	ctx.HTML(http.StatusOK, "state_quote.html", gin.H{
-		"title": "Edit State Quote",
-		"Quote": quote,
+		"title":   "Edit State Quote",
+		"Quote":   quote,
+		"Pending": countDraft,
+	})
+}
+
+func (server *Server) inboxQuotes(ctx *gin.Context) {
+	quotesQuery, err := server.store.ListPhrasesByState(ctx, DraftPhraseState)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	quotes := parseQuotes(quotesQuery)
+	countDraft, err := server.store.CountDraftPhrases(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.HTML(http.StatusOK, "inbox_quotes.html", gin.H{
+		"title":   "Quotes",
+		"Pending": countDraft,
+		"Quotes":  quotes,
 	})
 }

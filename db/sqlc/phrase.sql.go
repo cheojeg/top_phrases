@@ -139,6 +139,43 @@ func (q *Queries) ListPhrases(ctx context.Context) ([]Phrase, error) {
 	return items, nil
 }
 
+const listPhrasesByState = `-- name: ListPhrasesByState :many
+SELECT id, owner, state, phrase, author, created_at, published_at
+FROM phrases
+WHERE state = $1
+`
+
+func (q *Queries) ListPhrasesByState(ctx context.Context, state string) ([]Phrase, error) {
+	rows, err := q.db.QueryContext(ctx, listPhrasesByState, state)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Phrase{}
+	for rows.Next() {
+		var i Phrase
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.State,
+			&i.Phrase,
+			&i.Author,
+			&i.CreatedAt,
+			&i.PublishedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updatePhrase = `-- name: UpdatePhrase :one
 UPDATE phrases
 SET phrase = $2, author = $3

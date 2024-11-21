@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	draftPhraseState     = "draft"
-	publishedPhraseState = "published"
+	DraftPhraseState     = "draft"
+	PublishedPhraseState = "published"
+	ArchivedPhraseState  = "archived"
 )
 
 type createPhraseRequest struct {
@@ -29,7 +30,7 @@ func (server *Server) createPhrase(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreatePhraseParams{
 		Owner:     authPayload.Username,
-		State:     draftPhraseState,
+		State:     DraftPhraseState,
 		Phrase:    req.Phrase,
 		Author:    req.Author,
 		CreatedAt: time.Now(),
@@ -80,7 +81,7 @@ func (server *Server) updatePhraseState(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("HX-Redirect", "/quotes")
+	ctx.Header("HX-Redirect", "/inbox")
 	ctx.JSON(http.StatusOK, phrase)
 }
 
