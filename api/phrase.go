@@ -47,7 +47,7 @@ func (server *Server) createPhrase(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
+	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusOK, phrase)
 }
 
@@ -80,6 +80,7 @@ func (server *Server) updatePhraseState(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusOK, phrase)
 }
 
@@ -114,6 +115,6 @@ func (server *Server) updatePhrase(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
+	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusOK, phrase)
 }

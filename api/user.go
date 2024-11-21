@@ -207,7 +207,7 @@ func (server *Server) loginUserWeb(ctx *gin.Context) {
 		Value:    "bearer " + accessToken,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 	})
 	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusFound, gin.H{

@@ -30,6 +30,15 @@ SET published_at = NOW()
 WHERE id = $1
 RETURNING *;
 
-
 -- name: ListPhrases :many
 SELECT * FROM phrases;
+
+-- name: GetPhraseByID :one
+SELECT *
+FROM phrases
+WHERE id = $1;
+
+-- name: CountDraftPhrases :one
+SELECT COUNT(*)
+FROM phrases
+WHERE state = 'draft';

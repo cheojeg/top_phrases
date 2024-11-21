@@ -69,6 +69,10 @@ func (server *Server) setupRouter() {
 	authRoutes.PUT("/phrase", server.updatePhrase)
 	authRoutes.PUT("/phrase_state", server.updatePhraseState)
 	authRoutes.GET("/quotes", server.quotes)
+	authRoutes.GET("/create_quote", server.createQuote)
+	authRoutes.POST("/create_quote", server.createQuoteWeb)
+	authRoutes.GET("/edit_quote/:id", server.editQuoteWeb)
+	authRoutes.GET("/update_state_quote/:id", server.updateStateQuoteWeb)
 
 	router.HTMLRender = loadTemplates("./templates")
 	router.GET("/", server.index)
@@ -77,6 +81,7 @@ func (server *Server) setupRouter() {
 }
 
 func (server *Server) Start(address string) error {
+	//address = "0.0.0.0:8080"
 	return server.router.Run(address)
 }
 
