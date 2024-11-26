@@ -51,20 +51,16 @@ func formatMessage(phrase db.Phrase) string {
 	return phraseText
 }
 
-func (s *Service) GetPhraseToPublish(ctx context.Context) (string, error) {
-	phrase, _ := s.store.GetPhraseToPublish(ctx)
-	_, _ = s.store.UpdatePublishedAt(ctx, phrase.ID)
+func (s *Service) GetPhraseToPublish(ctx context.Context, days int64) (string, error) {
+	phrase, err := s.store.GetPhraseToPublish(ctx, days)
+	if err != nil {
+		return "", err
+	}
+	_, err = s.store.UpdatePublishedAt(ctx, phrase.ID)
+	if err != nil {
+		return "", err
+	}
 	fmt.Println(phrase)
-	// TODO - Update last published at date
-	//phraseToPublish := domain.Phrase{
-	//	ID:        &phrase.ID,
-	//	Phrase:    phrase.Phrase,
-	//	Author:    phrase.Author,
-	//	State:     phrase.State,
-	//	CreatedAt: phrase.CreatedAt,
-	//	// PublishedAt: phrase.PublishedAt,
-	//}
 	phraseText := formatMessage(phrase)
-
 	return phraseText, nil
 }

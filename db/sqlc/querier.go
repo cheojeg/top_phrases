@@ -11,12 +11,13 @@ import (
 )
 
 type Querier interface {
+	BlockSessions(ctx context.Context, username string) ([]Session, error)
 	CountDraftPhrases(ctx context.Context) (int64, error)
 	CreatePhrase(ctx context.Context, arg CreatePhraseParams) (Phrase, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetPhraseByID(ctx context.Context, id int64) (Phrase, error)
-	GetPhraseToPublish(ctx context.Context) (Phrase, error)
+	GetPhraseToPublish(ctx context.Context, dollar_1 interface{}) (Phrase, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	ListPhrases(ctx context.Context) ([]Phrase, error)

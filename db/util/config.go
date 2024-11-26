@@ -12,6 +12,7 @@ type Config struct {
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	AdminSecretCode      string        `mapstructure:"ADMIN_SECRET_CODE"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

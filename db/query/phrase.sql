@@ -20,7 +20,7 @@ RETURNING *;
 -- name: GetPhraseToPublish :one
 SELECT *
 FROM phrases
-WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '15 days'
+WHERE state = 'published' AND published_at IS NULL OR published_at < NOW() - $1 * interval '1 days'
 ORDER BY RANDOM()
 LIMIT 1;
 

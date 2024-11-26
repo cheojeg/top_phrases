@@ -84,13 +84,13 @@ func (q *Queries) GetPhraseByID(ctx context.Context, id int64) (Phrase, error) {
 const getPhraseToPublish = `-- name: GetPhraseToPublish :one
 SELECT id, owner, state, phrase, author, created_at, published_at
 FROM phrases
-WHERE published_at IS NULL OR published_at < NOW() - INTERVAL '15 days'
+WHERE state = 'published' AND published_at IS NULL OR published_at < NOW() - $1 * interval '1 days'
 ORDER BY RANDOM()
 LIMIT 1
 `
 
-func (q *Queries) GetPhraseToPublish(ctx context.Context) (Phrase, error) {
-	row := q.db.QueryRowContext(ctx, getPhraseToPublish)
+func (q *Queries) GetPhraseToPublish(ctx context.Context, dollar_1 interface{}) (Phrase, error) {
+	row := q.db.QueryRowContext(ctx, getPhraseToPublish, dollar_1)
 	var i Phrase
 	err := row.Scan(
 		&i.ID,

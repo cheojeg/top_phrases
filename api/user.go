@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/cheojeg/top_phrases/db/util"
+	"github.com/cheojeg/top_phrases/token"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -12,10 +13,11 @@ import (
 )
 
 type createUserRequest struct {
-	Username string `json:"username" binding:"required,alphanum"`
-	Password string `json:"password" binding:"required,min=6"`
-	FullName string `json:"full_name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
+	Username  string `json:"username" binding:"required,alphanum"`
+	Password  string `json:"password" binding:"required,min=6"`
+	FullName  string `json:"full_name" binding:"required"`
+	Email     string `json:"email" binding:"required,email"`
+	AdminCode string `json:"code"`
 }
 
 type userResponse struct {
@@ -40,6 +42,11 @@ func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if req.AdminCode != server.config.AdminSecretCode {
+		ctx.JSON(http.StatusForbidden, "invalid admin code")
 		return
 	}
 
@@ -213,4 +220,23 @@ func (server *Server) loginUserWeb(ctx *gin.Context) {
 	ctx.JSON(http.StatusFound, gin.H{
 		"authentication": accessToken,
 	})
+}
+
+type logoutResponse struct {
+	Blocked bool `json:"blocked"`
+}
+
+func (server *Server) logoutUser(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	_, err := server.store.BlockSessions(ctx, authPayload.Username)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	logoutResponse := logoutResponse{
+		Blocked: true,
+	}
+
+	ctx.JSON(http.StatusOK, logoutResponse)
 }

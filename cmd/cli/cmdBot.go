@@ -53,8 +53,7 @@ func newCmdBot() *cobra.Command {
 			for {
 				// Select a random message
 				ctx := context.Background()
-				phrase, err := service.GetPhraseToPublish(ctx)
-				//phrase, err := store.GetPhraseToPublish(ctx)
+				phrase, err := service.GetPhraseToPublish(ctx, 15)
 				if err != nil {
 					log.Fatal("cannot get phrase to publish:", err)
 					return nil
