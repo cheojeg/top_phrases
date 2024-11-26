@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -24,7 +25,18 @@ func NewJWTMaker(secretKey string) (Maker, error) {
 
 // CreateToken creates a new token for a specific username and duration
 func (maker *JWTMaker) CreateToken(username string, role string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(username, role, duration)
+	payload, err := NewPayload(username, uuid.Nil, duration)
+	if err != nil {
+		return "", payload, err
+	}
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	token, err := jwtToken.SignedString([]byte(maker.secretKey))
+	return token, payload, err
+}
+
+func (maker *JWTMaker) CreateAccessToken(username string, sid uuid.UUID, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, sid, duration)
 	if err != nil {
 		return "", payload, err
 	}

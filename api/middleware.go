@@ -3,8 +3,10 @@ package api
 import (
 	"errors"
 	"fmt"
+	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/cheojeg/top_phrases/token"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"strings"
 )
@@ -15,7 +17,7 @@ const (
 	authorizationPayloadKey = "authroization_payload"
 )
 
-func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
+func authMiddleware(tokenMaker token.Maker, store db.Store) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
@@ -51,6 +53,23 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		accessToken := fields[1]
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
+
+		// Check if session is blocked
+		sid, err := uuid.Parse(payload.SessionID)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
+		session, err := store.GetSession(ctx, sid)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
+		if session.IsBlocked {
+			err := fmt.Errorf("session is blocked")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}

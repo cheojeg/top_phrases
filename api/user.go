@@ -117,14 +117,14 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, accessTokenPayload, errToken := server.tokenMaker.CreateToken(user.Username, "", server.config.AccessTokenDuration)
-	if errToken != nil {
+	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(user.Username, "", server.config.RefreshTokenDuration)
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	refreshToken, refreshTokenPayload, err := server.tokenMaker.CreateToken(user.Username, "", server.config.RefreshTokenDuration)
-	if err != nil {
+	accessToken, accessTokenPayload, errToken := server.tokenMaker.CreateAccessToken(user.Username, refreshTokenPayload.ID, server.config.AccessTokenDuration)
+	if errToken != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -223,19 +223,26 @@ func (server *Server) loginUserWeb(ctx *gin.Context) {
 }
 
 type logoutResponse struct {
-	Blocked bool `json:"blocked"`
+	Blocked   bool   `json:"blocked"`
+	SessionID string `json:"sid"`
 }
 
 func (server *Server) logoutUser(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	_, err := server.store.BlockSessions(ctx, authPayload.Username)
+	sid, err := uuid.Parse(authPayload.SessionID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	_, err = server.store.BlockSession(ctx, sid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
 	logoutResponse := logoutResponse{
-		Blocked: true,
+		Blocked:   true,
+		SessionID: authPayload.SessionID,
 	}
 
 	ctx.JSON(http.StatusOK, logoutResponse)

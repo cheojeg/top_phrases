@@ -2,6 +2,7 @@ package token
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 	"time"
@@ -28,10 +29,22 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 
 // CreateToken creates a new token for a specific username and duration
 func (maker *PasetoMaker) CreateToken(username string, role string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(username, "role", duration)
+	payload, err := NewPayload(username, uuid.Nil, duration)
 	if err != nil {
 		return "", payload, err
 	}
+
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	return token, payload, err
+}
+
+func (maker *PasetoMaker) CreateAccessToken(username string, sid uuid.UUID, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, sid, duration)
+	if err != nil {
+		return "", payload, err
+	}
+
+	payload.ID = sid
 
 	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
 	return token, payload, err

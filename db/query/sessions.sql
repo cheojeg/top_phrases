@@ -15,8 +15,8 @@ INSERT INTO sessions (
 SELECT * FROM sessions
 WHERE id = $1 LIMIT 1;
 
--- name: BlockSessions :many
+-- name: BlockSession :one
 UPDATE sessions
 SET is_blocked = true
-WHERE username = $1
+WHERE id = $1
 RETURNING *;

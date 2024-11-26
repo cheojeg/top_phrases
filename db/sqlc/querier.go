@@ -11,7 +11,7 @@ import (
 )
 
 type Querier interface {
-	BlockSessions(ctx context.Context, username string) ([]Session, error)
+	BlockSession(ctx context.Context, id uuid.UUID) (Session, error)
 	CountDraftPhrases(ctx context.Context) (int64, error)
 	CreatePhrase(ctx context.Context, arg CreatePhraseParams) (Phrase, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
