@@ -152,6 +152,14 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		User:                  newUserResponse(user),
 	}
 
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "authorization",
+		Value:    "bearer " + accessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+	})
+	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusOK, rsp)
 
 }
@@ -245,5 +253,6 @@ func (server *Server) logoutUser(ctx *gin.Context) {
 		SessionID: authPayload.SessionID,
 	}
 
+	ctx.Header("HX-Redirect", "/")
 	ctx.JSON(http.StatusOK, logoutResponse)
 }

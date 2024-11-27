@@ -65,6 +65,7 @@ func authMiddleware(tokenMaker token.Maker, store db.Store) gin.HandlerFunc {
 		}
 		session, err := store.GetSession(ctx, sid)
 		if err != nil {
+			err := fmt.Errorf("session is invalid")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}

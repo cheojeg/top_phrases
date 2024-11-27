@@ -44,8 +44,6 @@ func (maker *PasetoMaker) CreateAccessToken(username string, sid uuid.UUID, dura
 		return "", payload, err
 	}
 
-	payload.ID = sid
-
 	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
 	return token, payload, err
 }
