@@ -1,7 +1,7 @@
-DB_URL=postgresql://root:secret@localhost:5460/top_phrases?sslmode=disable
+DB_URL=postgresql://root:secret@postgres:5432/top_phrases?sslmode=disable
 
 postgres:
-	docker run --name postgres_top_phrases -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5460:5432 -d postgres:12-alpine
+	docker run --name postgres_top_phrases -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -p 5432:5432 -d postgres:12-alpine
 
 createdb:
 	docker exec -it postgres_top_phrases createdb --username=root --owner=root top_phrases

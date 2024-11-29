@@ -43,7 +43,6 @@ func newCmdApi() *cobra.Command {
 		Use:   "api",
 		Short: "Starts the API server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			config, err := util.LoadConfig(".")
 			if err != nil {
 				log.Fatal("cannot load config:", err)
