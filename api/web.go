@@ -3,11 +3,13 @@ package api
 import (
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
 
 func (server *Server) index(ctx *gin.Context) {
+	log.Println("Hello this is index")
 	ctx.HTML(http.StatusOK, "login.html", gin.H{
 		"title": "Login",
 	})

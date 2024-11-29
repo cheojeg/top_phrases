@@ -47,6 +47,7 @@ func newCmdApi() *cobra.Command {
 			if err != nil {
 				log.Fatal("cannot load config:", err)
 			}
+			log.Println(config.DBSource)
 			conn, err := sql.Open(config.DBDriver, config.DBSource)
 
 			// Run db migration

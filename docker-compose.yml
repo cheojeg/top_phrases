@@ -11,8 +11,8 @@ services:
     volumes:
       - data-volume:/var/lib/postgresql/data
   api:
-    container_name: image-name
-    image: registry/image-name:latest
+    container_name: top-quotes-api
+    image: cheojeg/top-quotes-api:latest
     restart: always
     build:
       context: .
@@ -30,13 +30,13 @@ services:
       - ADMIN_SECRET_CODE=aB3dE5fG7hI9jK1lM2nO4pQ6rS8tU0vW
     depends_on:
       - postgres
-    entrypoint:
-      [
-        "/app/wait-for.sh",
-        "postgres:5432",
-        "--",
-        "/app/start.sh"
-      ]
-    command: [ "/app/main", "top_phrases/cmd", "api" ]
+#    entrypoint:
+#      [
+#        "/app/wait-for.sh",
+#        "postgres:5432",
+#        "--",
+#        "/app/start.sh"
+#      ]
+    command: [ "api" ]
 volumes:
   data-volume:

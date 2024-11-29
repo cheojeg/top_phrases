@@ -59,6 +59,8 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 
 func (server *Server) setupRouter() {
 	router := gin.Default()
+	router.HTMLRender = loadTemplates("./templates")
+	router.GET("/", server.index)
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
@@ -73,9 +75,6 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/edit_quote/:id", server.editQuoteWeb)
 	authRoutes.GET("/inbox", server.inboxQuotes)
 	authRoutes.GET("/update_state_quote/:id", server.updateStateQuoteWeb)
-
-	router.HTMLRender = loadTemplates("./templates")
-	router.GET("/", server.index)
 
 	server.router = router
 }
