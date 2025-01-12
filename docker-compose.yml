@@ -1,60 +1,12 @@
 version: "3.9"
 services:
-  postgres:
-    image: postgres:14-alpine
-    environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=top_quotes
-    ports:
-      - "5432:5432"
-    volumes:
-      - data-volume:/var/lib/postgresql/data
   api:
     container_name: top-quotes-api
-    image: cheojeg/top-quotes-api:latest
+    image: cheojeg/top-quotes-api:1.0.6
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    environment:
-      - DB_DRIVER=postgres
-      - DB_SOURCE=postgresql://root:secret@postgres:5432/top_quotes?sslmode=disable
-      - MIGRATION_URL=file://db/migration
-      - HTTP_SERVER_ADDRESS=0.0.0.0:8080
-      - TOKEN_SYMETRIC_KEY=12345678901234567890123456789012
-      - ACCESS_TOKEN_DURATION=15m
-      - REFRESH_TOKEN_DURATION=24h
-      - ADMIN_SECRET_CODE=aB3dE5fG7hI9jK1lM2nO4pQ6rS8tU0vW
-    depends_on:
-      - postgres
-#    entrypoint:
-#      [
-#        "/app/wait-for.sh",
-#        "postgres:5432",
-#        "--",
-#        "/app/start.sh"
-#      ]
     command: [ "api" ]
-  bot:
-    container_name: top-quotes-bot
-    image: cheojeg/top-quotes-api:latest
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - DB_DRIVER=postgres
-      - DB_SOURCE=postgresql://root:secret@postgres:5432/top_quotes?sslmode=disable
-      - MIGRATION_URL=file://db/migration
-      - TW_ACCESS_TOKEN=1418942918-B6h6WuuZwK7LeFXipoGKs77JMTH0D2rUrjnGPf4
-      - TW_ACCESS_SECRET=bgAlAwlFdlfyM7uNs43AULPK6iixFRjTUgdbZlfs1mZy1
-      - GOTWI_API_KEY=6P0PeRvAD6HycjaInn38kL6NB
-      - GOTWI_API_KEY_SECRET=cDGixjs0Y2WjDPVne9R61RSOtqTL12JtMAOAzxNFsj7ekRbJhs
-    depends_on:
-      - api
-    command: [ "bot" ]
-volumes:
-  data-volume:
