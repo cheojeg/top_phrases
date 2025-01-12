@@ -38,5 +38,23 @@ services:
 #        "/app/start.sh"
 #      ]
     command: [ "api" ]
+  bot:
+    container_name: top-quotes-bot
+    image: cheojeg/top-quotes-api:latest
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_DRIVER=postgres
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/top_quotes?sslmode=disable
+      - MIGRATION_URL=file://db/migration
+      - TW_ACCESS_TOKEN=1418942918-B6h6WuuZwK7LeFXipoGKs77JMTH0D2rUrjnGPf4
+      - TW_ACCESS_SECRET=bgAlAwlFdlfyM7uNs43AULPK6iixFRjTUgdbZlfs1mZy1
+      - GOTWI_API_KEY=6P0PeRvAD6HycjaInn38kL6NB
+      - GOTWI_API_KEY_SECRET=cDGixjs0Y2WjDPVne9R61RSOtqTL12JtMAOAzxNFsj7ekRbJhs
+    depends_on:
+      - api
+    command: [ "bot" ]
 volumes:
   data-volume:

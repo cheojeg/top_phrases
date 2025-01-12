@@ -23,6 +23,19 @@ func (q *Queries) CountDraftPhrases(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const countPhrasesPublishedToday = `-- name: CountPhrasesPublishedToday :one
+SELECT COUNT(*)
+FROM phrases
+WHERE published_at::date = CURRENT_DATE
+`
+
+func (q *Queries) CountPhrasesPublishedToday(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countPhrasesPublishedToday)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createPhrase = `-- name: CreatePhrase :one
 INSERT INTO phrases (
     owner, state, phrase, author, created_at

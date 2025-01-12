@@ -47,3 +47,8 @@ WHERE state = 'draft';
 SELECT *
 FROM phrases
 WHERE state = $1;
+
+-- name: CountPhrasesPublishedToday :one
+SELECT COUNT(*)
+FROM phrases
+WHERE published_at::date = CURRENT_DATE;

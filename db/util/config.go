@@ -14,6 +14,10 @@ type Config struct {
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 	AdminSecretCode      string        `mapstructure:"ADMIN_SECRET_CODE"`
+	TwAccessToken        string        `mapstructure:"TW_ACCESS_TOKEN"`
+	TwAccessSecret       string        `mapstructure:"TW_ACCESS_SECRET"`
+	GotwiApiKey          string        `mapstructure:"GOTWI_API_KEY"`
+	GotwiApiKeySecret    string        `mapstructure:"GOTWI_API_KEY_SECRET"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

@@ -41,7 +41,7 @@ func escapeMarkdown(text string) string {
 	return replacer.Replace(text)
 }
 
-func formatMessage(phrase db.Phrase) string {
+func formatMessageMarkdown(phrase db.Phrase) string {
 	phraseText := fmt.Sprintf("%s", escapeMarkdown(phrase.Phrase))
 	if phrase.Author != "" {
 		phraseText += fmt.Sprintf(" \\- *%s*", escapeMarkdown(phrase.Author))
@@ -51,7 +51,26 @@ func formatMessage(phrase db.Phrase) string {
 	return phraseText
 }
 
+func formatMessage(phrase db.Phrase) string {
+	phraseText := fmt.Sprintf("%s", phrase.Phrase)
+	if phrase.Author != "" {
+		phraseText += fmt.Sprintf(" - %s", phrase.Author)
+	} else {
+		phraseText += " - Desconocido"
+	}
+	return phraseText
+}
+
 func (s *Service) GetPhraseToPublish(ctx context.Context, days int64) (string, error) {
+	countPhrases, err := s.store.CountPhrasesPublishedToday(context.Background())
+	if err != nil {
+		return "", err
+	}
+
+	if countPhrases > 0 {
+		return "", fmt.Errorf("A quote was already published today")
+	}
+
 	phrase, err := s.store.GetPhraseToPublish(ctx, days)
 	if err != nil {
 		return "", err
@@ -60,7 +79,6 @@ func (s *Service) GetPhraseToPublish(ctx context.Context, days int64) (string, e
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(phrase)
 	phraseText := formatMessage(phrase)
 	return phraseText, nil
 }

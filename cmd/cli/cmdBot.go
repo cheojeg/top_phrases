@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	sv "github.com/cheojeg/top_phrases/core/services"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/cheojeg/top_phrases/db/util"
@@ -12,7 +13,9 @@ import (
 	"os"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/michimani/gotwi"
+	"github.com/michimani/gotwi/tweet/managetweet"
+	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
 func newCmdBot() *cobra.Command {
@@ -32,42 +35,73 @@ func newCmdBot() *cobra.Command {
 			store := db.NewStore(conn)
 			service := sv.NewService(store)
 
-			botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-			if botToken == "" {
-				log.Fatal("TELEGRAM_BOT_TOKEN environment variable is not set")
+			if config.TwAccessToken == "" {
+				log.Fatal("TW_ACCESS_TOKEN environment variable is not set")
 			}
 
-			chatID := os.Getenv("CHAT_ID")
-			if chatID == "" {
-				log.Fatal("CHAT_ID environment variable is not set")
+			if config.TwAccessSecret == "" {
+				log.Fatal("TW_ACCESS_SECRET environment variable is not set")
 			}
 
-			bot, err := tgbotapi.NewBotAPI(botToken)
-			if err != nil {
-				log.Panic(err)
+			if config.TwAccessToken == "" || config.TwAccessSecret == "" {
+				log.Fatal("Please set the TW_ACCESS_TOKEN and TW_ACCESS_SECRET environment variables.")
+				os.Exit(1)
 			}
 
-			bot.Debug = true
-
-			log.Printf("Authorized on account %s", bot.Self.UserName)
 			for {
 				// Select a random message
 				ctx := context.Background()
 				phrase, err := service.GetPhraseToPublish(ctx, 15)
 				if err != nil {
-					log.Fatal("cannot get phrase to publish:", err)
-					return nil
+					log.Println("cannot get phrase to publish:", err)
+					time.Sleep(30 * time.Minute)
+					//time.Sleep(24 * time.Hour)
+					continue
+					//return nil
 				}
 
-				msg := tgbotapi.NewMessageToChannel(chatID, phrase)
-				msg.ParseMode = "MarkdownV2"
-				bot.Send(msg)
+				client, err := newOAuth1Client(config.TwAccessToken, config.TwAccessSecret)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
 
-				// Sleep for 60 seconds
-				time.Sleep(60 * time.Second)
+				log.Println(phrase)
+				tweetId, err := tweet(client, phrase)
+				if err != nil {
+					log.Println(os.Stderr, err)
+					//os.Exit(2)
+				}
+
+				log.Println("tweet id", tweetId)
+				// Sleep for 24 hours
+				time.Sleep(24 * time.Hour)
 			}
 			return nil
 		},
 	}
 	return cmd
+}
+
+func newOAuth1Client(accessToken, accessSecret string) (*gotwi.Client, error) {
+	in := &gotwi.NewClientInput{
+		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
+		OAuthToken:           accessToken,
+		OAuthTokenSecret:     accessSecret,
+	}
+
+	return gotwi.NewClient(in)
+}
+
+func tweet(c *gotwi.Client, text string) (string, error) {
+	p := &types.CreateInput{
+		Text: gotwi.String(text),
+	}
+
+	res, err := managetweet.Create(context.Background(), c, p)
+	if err != nil {
+		return "", err
+	}
+
+	return gotwi.StringValue(res.Data.ID), nil
 }

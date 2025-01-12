@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	BlockSession(ctx context.Context, id uuid.UUID) (Session, error)
 	CountDraftPhrases(ctx context.Context) (int64, error)
+	CountPhrasesPublishedToday(ctx context.Context) (int64, error)
 	CreatePhrase(ctx context.Context, arg CreatePhraseParams) (Phrase, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
