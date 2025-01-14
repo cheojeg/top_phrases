@@ -1,16 +1,24 @@
 package cli
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"github.com/cheojeg/top_phrases/api"
+	sv "github.com/cheojeg/top_phrases/core/services"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/cheojeg/top_phrases/db/util"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	"github.com/michimani/gotwi"
+	"github.com/michimani/gotwi/tweet/managetweet"
+	"github.com/michimani/gotwi/tweet/managetweet/types"
+	"github.com/robfig/cron"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
 )
 
 func runGinServer(config util.Config, store db.Store) {
@@ -54,10 +62,65 @@ func newCmdApi() *cobra.Command {
 			runDbMigration(config.MigrationURL, config.DBSource)
 
 			store := db.NewStore(conn)
+			service := sv.NewService(store)
+
+			publishPhrase(*service, *config)
+			c := cron.New()
+			c.AddFunc("@every 24h", func() { publishPhrase(*service, *config) })
+			c.Start()
+
 			runGinServer(*config, store)
 
 			return nil
 		},
 	}
 	return cmd
+}
+
+func publishPhrase(service sv.Service, config util.Config) {
+	ctx := context.Background()
+	phrase, err := service.GetPhraseToPublish(ctx, 15)
+	if err != nil {
+		log.Println("cannot get phrase to publish:", err)
+		//time.Sleep(24 * time.Hour)
+		return
+	}
+
+	client, err := newOAuth1Client(config.TwAccessToken, config.TwAccessSecret)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	log.Println(phrase)
+	tweetId, err := tweet(client, phrase)
+	if err != nil {
+		log.Println(os.Stderr, err)
+		//os.Exit(2)
+	}
+
+	log.Println("tweet id", tweetId)
+}
+
+func newOAuth1Client(accessToken, accessSecret string) (*gotwi.Client, error) {
+	in := &gotwi.NewClientInput{
+		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
+		OAuthToken:           accessToken,
+		OAuthTokenSecret:     accessSecret,
+	}
+
+	return gotwi.NewClient(in)
+}
+
+func tweet(c *gotwi.Client, text string) (string, error) {
+	p := &types.CreateInput{
+		Text: gotwi.String(text),
+	}
+
+	res, err := managetweet.Create(context.Background(), c, p)
+	if err != nil {
+		return "", err
+	}
+
+	return gotwi.StringValue(res.Data.ID), nil
 }

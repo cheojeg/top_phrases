@@ -12,10 +12,6 @@ import (
 	"log"
 	"os"
 	"time"
-
-	"github.com/michimani/gotwi"
-	"github.com/michimani/gotwi/tweet/managetweet"
-	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
 func newCmdBot() *cobra.Command {
@@ -81,27 +77,4 @@ func newCmdBot() *cobra.Command {
 		},
 	}
 	return cmd
-}
-
-func newOAuth1Client(accessToken, accessSecret string) (*gotwi.Client, error) {
-	in := &gotwi.NewClientInput{
-		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
-		OAuthToken:           accessToken,
-		OAuthTokenSecret:     accessSecret,
-	}
-
-	return gotwi.NewClient(in)
-}
-
-func tweet(c *gotwi.Client, text string) (string, error) {
-	p := &types.CreateInput{
-		Text: gotwi.String(text),
-	}
-
-	res, err := managetweet.Create(context.Background(), c, p)
-	if err != nil {
-		return "", err
-	}
-
-	return gotwi.StringValue(res.Data.ID), nil
 }
