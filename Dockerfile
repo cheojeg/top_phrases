@@ -12,6 +12,7 @@ COPY app.env .
 COPY db/migration ./db/migration
 COPY templates/ ./templates
 
+
 EXPOSE 8080
 ENTRYPOINT ["app"]
 CMD ["api"]
