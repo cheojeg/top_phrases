@@ -83,10 +83,10 @@ func publishPhrase(service sv.Service, config util.Config) {
 	if err != nil {
 		log.Println("cannot get phrase to publish:", err)
 		//time.Sleep(24 * time.Hour)
-		return
+		// return
 	}
 
-	client, err := newOAuth1Client(config.TwAccessToken, config.TwAccessSecret)
+	client, err := newOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -102,9 +102,11 @@ func publishPhrase(service sv.Service, config util.Config) {
 	log.Println("tweet id", tweetId)
 }
 
-func newOAuth1Client(accessToken, accessSecret string) (*gotwi.Client, error) {
+func newOAuth1Client(apiKey, apiSecret, accessToken, accessSecret string) (*gotwi.Client, error) {
 	in := &gotwi.NewClientInput{
 		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
+		APIKey:               apiKey,
+		APIKeySecret:         apiSecret,
 		OAuthToken:           accessToken,
 		OAuthTokenSecret:     accessSecret,
 	}

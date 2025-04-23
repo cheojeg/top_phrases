@@ -81,7 +81,7 @@ func (server *Server) updatePhraseState(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("HX-Redirect", "/inbox")
+	ctx.Header("HX-Redirect", "/quotes")
 	ctx.JSON(http.StatusOK, phrase)
 }
 

@@ -56,7 +56,7 @@ func newCmdBot() *cobra.Command {
 					//return nil
 				}
 
-				client, err := newOAuth1Client(config.TwAccessToken, config.TwAccessSecret)
+				client, err := newOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
