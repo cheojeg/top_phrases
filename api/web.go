@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -202,10 +203,28 @@ func (server *Server) quoteOfTheDay(ctx *gin.Context) {
 		State:  phrase.State,
 	}
 	date := sqlNullTimeToStringDate(phrase.PublishedAt)
-	ctx.HTML(http.StatusOK, "quote_of_the_day.html", gin.H{
+	dateParts := strings.Split(date, "-")
+	months := map[string]string{
+		"01": "enero",
+		"02": "febrero",
+		"03": "marzo",
+		"04": "abril",
+		"05": "mayo",
+		"06": "junio",
+		"07": "julio",
+		"08": "agosto",
+		"09": "septiembre",
+		"10": "octubre",
+		"11": "noviembre",
+		"12": "diciembre",
+	}
+	ctx.HTML(http.StatusOK, "quote_of_the_day", gin.H{
 		"title": "Frase del día",
 		"Quote": quote,
 		"Date":  date,
+		"Day":   dateParts[0],
+		"Month": months[dateParts[1]],
+		"Year":  dateParts[2],
 	})
 }
 
@@ -227,7 +246,7 @@ func (server *Server) checkQuoteOfTheDay(ctx *gin.Context) {
 	if date != today {
 		allowPublish = true
 	}
-	ctx.HTML(http.StatusOK, "check_quote_of_the_day.html", gin.H{
+	ctx.HTML(http.StatusOK, "quote_of_the_day.html", gin.H{
 		"title":        "Frase del día",
 		"Quote":        quote,
 		"Date":         date,

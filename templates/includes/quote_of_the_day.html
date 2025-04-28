@@ -1,6 +1,9 @@
 {{define "content"}}
-  <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 mt-6 mb-6">
-    <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Quote.Text }}"</blockquote>
-    <p class="text-lg mt-3 text-gray-600 text-right">— {{ .Quote.Author }}</p>
+  <div class="text-gray-400 text-sm mb-5">{{ .Day }} de {{ .Month }} de {{ .Year }}</div>
+  <div class="text-3xl max-w-xl leading-snug text-left px-4">
+      "<span class="font-bold">{{ .Quote.Text }}</span>"
+      <div class="text-right mt-4 font-bold">
+        {{ .Quote.Author }}
+      </div>
   </div>
 {{end}}

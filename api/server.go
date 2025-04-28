@@ -54,9 +54,14 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 	for _, include := range includes {
 		layoutCopy := make([]string, len(layouts))
 		copy(layoutCopy, layouts)
+		if include == "templates/includes/quote_of_the_day.html" {
+			continue
+		}
 		layoutCopy = append(layoutCopy, include)
 		r.AddFromFiles(filepath.Base(include), layoutCopy...)
 	}
+
+	r.AddFromFiles("quote_of_the_day", "templates/layouts/base_quote_of_the_day.html", "templates/includes/quote_of_the_day.html")
 	return r
 }
 
