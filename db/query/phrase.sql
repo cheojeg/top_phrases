@@ -52,3 +52,10 @@ WHERE state = $1;
 SELECT COUNT(*)
 FROM phrases
 WHERE published_at::date = CURRENT_DATE;
+
+-- name: GetQuoteOfTheDay :one
+SELECT *
+FROM phrases
+WHERE state = 'published' AND published_at IS NOT NULL
+ORDER BY published_at DESC
+LIMIT 1;

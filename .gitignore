@@ -26,4 +26,8 @@ go.work.sum
 
 .idea/
 
+main.go
+
+frases.txt
+
 app.env

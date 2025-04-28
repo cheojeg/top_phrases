@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/cheojeg/top_phrases/api"
 	sv "github.com/cheojeg/top_phrases/core/services"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
@@ -21,8 +20,8 @@ import (
 	"os"
 )
 
-func runGinServer(config util.Config, store db.Store) {
-	server, err := api.NewServer(config, store)
+func runGinServer(config util.Config, store db.Store, service sv.Service) {
+	server, err := api.NewServer(config, store, service)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
@@ -64,12 +63,11 @@ func newCmdApi() *cobra.Command {
 			store := db.NewStore(conn)
 			service := sv.NewService(store)
 
-			publishPhrase(*service, *config)
 			c := cron.New()
 			c.AddFunc("@every 24h", func() { publishPhrase(*service, *config) })
 			c.Start()
 
-			runGinServer(*config, store)
+			runGinServer(*config, store, *service)
 
 			return nil
 		},
@@ -79,30 +77,35 @@ func newCmdApi() *cobra.Command {
 
 func publishPhrase(service sv.Service, config util.Config) {
 	ctx := context.Background()
-	phrase, err := service.GetPhraseToPublish(ctx, 15)
-	if err != nil {
-		log.Println("cannot get phrase to publish:", err)
-		//time.Sleep(24 * time.Hour)
-		// return
+	if config.PostEnabled {
+		phrase, err := service.GetPhraseToPublish(ctx, 15)
+		if err != nil {
+			log.Println("cannot get phrase to publish:", err)
+			return
+		}
+
+		client, err := NewOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
+		if err != nil {
+			log.Println("Error creating OAuth1Client:", err)
+			return
+		}
+
+		log.Println(phrase)
+		tweetId, err := XPost(client, phrase)
+		if err != nil {
+			log.Println("Error posting:", err)
+			log.Println(os.Stderr, err)
+			return
+		}
+
+		log.Println("XPost id", tweetId)
+	} else {
+		log.Println("Posting is disabled")
 	}
 
-	client, err := newOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
-	log.Println(phrase)
-	tweetId, err := tweet(client, phrase)
-	if err != nil {
-		log.Println(os.Stderr, err)
-		//os.Exit(2)
-	}
-
-	log.Println("tweet id", tweetId)
 }
 
-func newOAuth1Client(apiKey, apiSecret, accessToken, accessSecret string) (*gotwi.Client, error) {
+func NewOAuth1Client(apiKey, apiSecret, accessToken, accessSecret string) (*gotwi.Client, error) {
 	in := &gotwi.NewClientInput{
 		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
 		APIKey:               apiKey,
@@ -114,7 +117,7 @@ func newOAuth1Client(apiKey, apiSecret, accessToken, accessSecret string) (*gotw
 	return gotwi.NewClient(in)
 }
 
-func tweet(c *gotwi.Client, text string) (string, error) {
+func XPost(c *gotwi.Client, text string) (string, error) {
 	p := &types.CreateInput{
 		Text: gotwi.String(text),
 	}

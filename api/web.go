@@ -5,13 +5,12 @@ import (
 	"fmt"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (server *Server) index(ctx *gin.Context) {
-	log.Println("Hello this is index")
 	ctx.HTML(http.StatusOK, "login.html", gin.H{
 		"title": "Login",
 	})
@@ -28,6 +27,13 @@ type Quote struct {
 func sqlNullTimeToString(nt sql.NullTime) string {
 	if nt.Valid {
 		return nt.Time.Format("2006-01-02 15:04:05")
+	}
+	return ""
+}
+
+func sqlNullTimeToStringDate(nt sql.NullTime) string {
+	if nt.Valid {
+		return nt.Time.Format("02-01-2006")
 	}
 	return ""
 }
@@ -180,5 +186,51 @@ func (server *Server) inboxQuotes(ctx *gin.Context) {
 		"title":   "Quotes",
 		"Pending": countDraft,
 		"Quotes":  quotes,
+	})
+}
+
+func (server *Server) quoteOfTheDay(ctx *gin.Context) {
+	phrase, err := server.store.GetQuoteOfTheDay(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	quote := Quote{
+		ID:     phrase.ID,
+		Text:   phrase.Phrase,
+		Author: phrase.Author,
+		State:  phrase.State,
+	}
+	date := sqlNullTimeToStringDate(phrase.PublishedAt)
+	ctx.HTML(http.StatusOK, "quote_of_the_day.html", gin.H{
+		"title": "Frase del día",
+		"Quote": quote,
+		"Date":  date,
+	})
+}
+
+func (server *Server) checkQuoteOfTheDay(ctx *gin.Context) {
+	phrase, err := server.store.GetQuoteOfTheDay(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	quote := Quote{
+		ID:     phrase.ID,
+		Text:   phrase.Phrase,
+		Author: phrase.Author,
+		State:  phrase.State,
+	}
+	date := sqlNullTimeToStringDate(phrase.PublishedAt)
+	today := time.Now().Format("02-01-2006")
+	allowPublish := false
+	if date != today {
+		allowPublish = true
+	}
+	ctx.HTML(http.StatusOK, "check_quote_of_the_day.html", gin.H{
+		"title":        "Frase del día",
+		"Quote":        quote,
+		"Date":         date,
+		"allowPublish": allowPublish,
 	})
 }

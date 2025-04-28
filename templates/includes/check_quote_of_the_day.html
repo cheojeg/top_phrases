@@ -1,0 +1,14 @@
+{{define "content"}}
+{{block "sidebar" .}} {{end}}
+
+<div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 mt-6 mb-6">
+    <h1>{{ .Date }}</h1>
+    <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Quote.Text }}"</blockquote>
+    <p class="text-lg mt-3 text-gray-600 text-right">— {{ .Quote.Author }}</p>
+</div>
+{{ if .allowPublish }}
+    <div class="flex justify-end space-x-2 max-w-lg mx-auto mt-6 mb-6">
+        <button hx-get="/publish_quote_of_the_day" hx-trigger="click" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Publicar frase del día</button>
+    </div>
+{{end}}
+{{end}}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	service "github.com/cheojeg/top_phrases/core/services"
 	db "github.com/cheojeg/top_phrases/db/sqlc"
 	"github.com/cheojeg/top_phrases/db/util"
 	"github.com/cheojeg/top_phrases/token"
@@ -14,11 +15,12 @@ import (
 type Server struct {
 	config     util.Config
 	store      db.Store
+	service    service.Service
 	tokenMaker token.Maker
 	router     *gin.Engine
 }
 
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, service service.Service) (*Server, error) {
 	//tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
@@ -27,6 +29,7 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	server := &Server{
 		config:     config,
 		store:      store,
+		service:    service,
 		tokenMaker: tokenMaker,
 	}
 
@@ -64,6 +67,7 @@ func (server *Server) setupRouter() {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
+	router.GET("/frase_del_dia", server.quoteOfTheDay)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker, server.store))
 	authRoutes.GET("/logout", server.logoutUser)
@@ -75,6 +79,8 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/edit_quote/:id", server.editQuoteWeb)
 	authRoutes.GET("/inbox", server.inboxQuotes)
 	authRoutes.GET("/update_state_quote/:id", server.updateStateQuoteWeb)
+	authRoutes.GET("/check_quote_of_the_day", server.checkQuoteOfTheDay)
+	authRoutes.GET("/publish_quote_of_the_day", server.publishQuoteOfTheDay)
 
 	server.router = router
 }

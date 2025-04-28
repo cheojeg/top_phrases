@@ -1,6 +1,6 @@
 {{define "content"}}
-<div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6">
-  <p class="text-xl text-gray-700 italic text-center mb-4 mt-4">"The only limit to our realization of tomorrow is our doubts of today."</p>
-  <p class="text-lg text-gray-600 text-right">- Franklin D. Roosevelt !!!!!!!!</p>
-</div>
+  <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 mt-6 mb-6">
+    <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Quote.Text }}"</blockquote>
+    <p class="text-lg mt-3 text-gray-600 text-right">— {{ .Quote.Author }}</p>
+  </div>
 {{end}}

@@ -19,11 +19,17 @@
                         <span class="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Archived</span>
                     {{ end }}
                     <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Text }}"</blockquote>
-                    <p class="text-lg text-gray-600 text-right">- {{ .Author }}</p>
+                    <p class="text-lg text-gray-600 text-right">— {{ .Author }}</p>
                     <a href="/edit_quote/{{.ID}}">Editar</a>
-                    {{ if or (eq .State "published") (eq .State "draft") }}
-                        <button hx-put="/phrase_state" hx-ext="json-enc" hx-vals='{"id": {{.ID}}, "state": "archived"}' hx-trigger="click" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Archivar</button>
-                    {{ end }}
+                    <br>
+                    <div class="flex justify-end space-x-2">
+                        {{ if or (eq .State "published") (eq .State "draft") }}
+                            <button hx-put="/phrase_state" hx-ext="json-enc" hx-vals='{"id": {{.ID}}, "state": "archived"}' hx-trigger="click" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Archivar</button>
+                        {{ end }}
+                        {{ if or (eq .State "archived") (eq .State "draft")}}
+                            <button hx-put="/phrase_state" hx-ext="json-enc" hx-vals='{"id": {{.ID}}, "state": "published"}' hx-trigger="click" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Publicar</button>
+                        {{ end }}
+                    </div>
                     {{ if eq .State "published"}}
                         <h4>Publicado el: {{ .PublishedAt }}</h4>
                     {{ end }}

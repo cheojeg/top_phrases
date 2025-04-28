@@ -1,60 +1,76 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/michimani/gotwi"
-	"github.com/michimani/gotwi/tweet/managetweet"
-	"github.com/michimani/gotwi/tweet/managetweet/types"
+	"bufio"
+	"database/sql"
+	_ "github.com/lib/pq"
 	"log"
+	"os"
+	"strings"
 )
 
+type Phrase struct {
+	Text   string
+	Author string
+}
+
 func main() {
-	// Credenciales de OAuth
-	apiKey := "JjQ8dRFj0Lmpjkdoz3paYE8ua"
-	apiSecret := "vGZIguoxPheDGzENhfvTL05X8LwF54L51obUslSlGWI3d6W41W"
-	accessToken := "1914708842019217408-hcbtjAuN9y3JvO7WJwrD3cHHk9kr1p"
-	accessSecret := "hUYZRuwcO4ESl4AL7OJImrPDvXVgrYevW4YiLtgxBErwP"
+	// Ruta del archivo de texto
+	filePath := "frases.txt"
 
-	// Crear cliente OAuth 1.0a
-	client, err := newOAuth1Client(apiKey, apiSecret, accessToken, accessSecret)
+	// Conexión a la base de datos
+	db, err := sql.Open("postgres", "")
 	if err != nil {
-		log.Fatalf("Error al crear el cliente OAuth: %v", err)
+		log.Fatalf("Error al conectar a la base de datos: %v", err)
 	}
+	defer db.Close()
 
-	// Texto del tweet
-	tweetText := "¡Hola, mundo! Este es un tweet publicado desde Go."
-
-	// Publicar el tweet
-	tweetID, err := postTweet(client, tweetText)
+	// Leer el archivo y procesar las frases
+	err = processFile(filePath, db)
 	if err != nil {
-		log.Fatalf("Error al publicar el tweet: %v", err)
+		log.Fatalf("Error al procesar el archivo: %v", err)
 	}
-
-	fmt.Printf("Tweet publicado con éxito. ID: %s\n", tweetID)
 }
 
-func newOAuth1Client(apiKey, apiSecret, accessToken, accessSecret string) (*gotwi.Client, error) {
-	in := &gotwi.NewClientInput{
-		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
-		APIKey:               apiKey,
-		APIKeySecret:         apiSecret,
-		OAuthToken:           accessToken,
-		OAuthTokenSecret:     accessSecret,
+func processFile(filePath string, db *sql.DB) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.SplitN(line, "—", 2)
+		if len(parts) != 2 {
+			log.Printf("Línea inválida: %s", line)
+			continue
+		}
+
+		phrase := Phrase{
+			Text:   strings.TrimSpace(parts[0]),
+			Author: strings.TrimSpace(parts[1]),
+		}
+
+		err := savePhraseToDB(db, phrase)
+		if err != nil {
+			log.Printf("Error al guardar la frase: %v", err)
+		}
 	}
 
-	return gotwi.NewClient(in)
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func postTweet(client *gotwi.Client, text string) (string, error) {
-	p := &types.CreateInput{
-		Text: gotwi.String(text),
-	}
-
-	res, err := managetweet.Create(context.Background(), client, p)
-	if err != nil {
-		return "", err
-	}
-
-	return gotwi.StringValue(res.Data.ID), nil
+func savePhraseToDB(db *sql.DB, phrase Phrase) error {
+	query := `
+		INSERT INTO phrases (phrase, author, owner, state, created_at)
+		VALUES ($1, $2, 'cheojeg', 'published', NOW())
+	`
+	_, err := db.Exec(query, phrase.Text, phrase.Author)
+	return err
 }

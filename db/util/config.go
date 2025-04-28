@@ -18,6 +18,7 @@ type Config struct {
 	TwAccessSecret       string        `mapstructure:"TW_ACCESS_SECRET"`
 	GotwiApiKey          string        `mapstructure:"GOTWI_API_KEY"`
 	GotwiApiKeySecret    string        `mapstructure:"GOTWI_API_KEY_SECRET"`
+	PostEnabled          bool          `mapstructure:"POST_ENABLED"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

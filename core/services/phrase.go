@@ -37,6 +37,7 @@ func escapeMarkdown(text string) string {
 		"}", "\\}",
 		".", "\\.",
 		"!", "\\!",
+		"—", "\\—",
 	)
 	return replacer.Replace(text)
 }
@@ -44,9 +45,9 @@ func escapeMarkdown(text string) string {
 func formatMessageMarkdown(phrase db.Phrase) string {
 	phraseText := fmt.Sprintf("%s", escapeMarkdown(phrase.Phrase))
 	if phrase.Author != "" {
-		phraseText += fmt.Sprintf(" \\- *%s*", escapeMarkdown(phrase.Author))
+		phraseText += fmt.Sprintf(" \\— *%s*", escapeMarkdown(phrase.Author))
 	} else {
-		phraseText += " \\- *Desconocido*"
+		phraseText += " \\— *Desconocido*"
 	}
 	return phraseText
 }
@@ -54,9 +55,9 @@ func formatMessageMarkdown(phrase db.Phrase) string {
 func formatMessage(phrase db.Phrase) string {
 	phraseText := fmt.Sprintf("%s", phrase.Phrase)
 	if phrase.Author != "" {
-		phraseText += fmt.Sprintf(" - %s", phrase.Author)
+		phraseText += fmt.Sprintf(" — %s", phrase.Author)
 	} else {
-		phraseText += " - Desconocido"
+		phraseText += " — Desconocido"
 	}
 	return phraseText
 }

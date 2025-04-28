@@ -56,20 +56,20 @@ func newCmdBot() *cobra.Command {
 					//return nil
 				}
 
-				client, err := newOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
+				client, err := NewOAuth1Client(config.GotwiApiKey, config.GotwiApiKeySecret, config.TwAccessToken, config.TwAccessSecret)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
 				}
 
 				log.Println(phrase)
-				tweetId, err := tweet(client, phrase)
+				tweetId, err := XPost(client, phrase)
 				if err != nil {
 					log.Println(os.Stderr, err)
 					//os.Exit(2)
 				}
 
-				log.Println("tweet id", tweetId)
+				log.Println("XPost id", tweetId)
 				// Sleep for 24 hours
 				time.Sleep(24 * time.Hour)
 			}
