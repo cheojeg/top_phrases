@@ -246,7 +246,7 @@ func (server *Server) checkQuoteOfTheDay(ctx *gin.Context) {
 	if date != today {
 		allowPublish = true
 	}
-	ctx.HTML(http.StatusOK, "quote_of_the_day.html", gin.H{
+	ctx.HTML(http.StatusOK, "check_quote_of_the_day.html", gin.H{
 		"title":        "Frase del día",
 		"Quote":        quote,
 		"Date":         date,

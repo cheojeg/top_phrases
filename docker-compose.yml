@@ -2,7 +2,7 @@ version: "3.9"
 services:
   api:
     container_name: top-quotes-api
-    image: cheojeg/top-quotes-api:1.0.14
+    image: cheojeg/top-quotes-api:1.0.15
     restart: always
     build:
       context: .

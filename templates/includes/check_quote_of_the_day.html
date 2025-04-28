@@ -2,9 +2,9 @@
 {{block "sidebar" .}} {{end}}
 
 <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6 mt-6 mb-6">
-    <h1>{{ .Date }}</h1>
     <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Quote.Text }}"</blockquote>
     <p class="text-lg mt-3 text-gray-600 text-right">— {{ .Quote.Author }}</p>
+    <h4>Publicado el: {{ .Date }}</h4>
 </div>
 {{ if .allowPublish }}
     <div class="flex justify-end space-x-2 max-w-lg mx-auto mt-6 mb-6">
