@@ -31,7 +31,9 @@ WHERE id = $1
 RETURNING *;
 
 -- name: ListPhrases :many
-SELECT * FROM phrases;
+SELECT *
+FROM phrases
+LIMIT 20 OFFSET $1;
 
 -- name: GetPhraseByID :one
 SELECT *

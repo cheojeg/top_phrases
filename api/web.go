@@ -60,6 +60,7 @@ func isValidState(state string) bool {
 func (server *Server) quotes(ctx *gin.Context) {
 
 	state := ctx.Query("state")
+
 	fmt.Println(state)
 	quotesQuery := []db.Phrase{}
 	var err error
@@ -70,7 +71,7 @@ func (server *Server) quotes(ctx *gin.Context) {
 			return
 		}
 	} else {
-		quotesQuery, err = server.store.ListPhrases(ctx)
+		quotesQuery, err = server.store.ListPhrases(ctx, int32(0))
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
@@ -88,6 +89,23 @@ func (server *Server) quotes(ctx *gin.Context) {
 		"title":   "Quotes",
 		"Pending": countDraft,
 		"Quotes":  quotes,
+	})
+}
+
+func (server *Server) loadMoreQuotes(ctx *gin.Context) {
+	page := ctx.Query("page")
+	pageNum, _ := strconv.Atoi(page)
+	offset := (pageNum - 1) * 20
+	quotesQuery, err := server.store.ListPhrases(ctx, int32(offset))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	quotes := parseQuotes(quotesQuery)
+	ctx.HTML(http.StatusOK, "quotes_partial.html", gin.H{
+		"Quotes": quotes,
+		"Page":   pageNum + 1,
 	})
 }
 

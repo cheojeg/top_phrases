@@ -86,6 +86,7 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/update_state_quote/:id", server.updateStateQuoteWeb)
 	authRoutes.GET("/check_quote_of_the_day", server.checkQuoteOfTheDay)
 	authRoutes.GET("/publish_quote_of_the_day", server.publishQuoteOfTheDay)
+	authRoutes.GET("/load_quotes", server.loadMoreQuotes)
 
 	server.router = router
 }

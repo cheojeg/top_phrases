@@ -37,5 +37,19 @@
             </ul>
         </div>
     {{end}}
+
+    <div id="quotes-container">
+        <!-- Aquí se cargan las frases iniciales -->
+    </div>
+
+    <div
+            id="load-more-trigger"
+            hx-get="/load_quotes?page=2"
+            hx-trigger="revealed"
+            hx-swap="beforeend"
+            hx-indicator="#loading-spinner">
+    </div>
+
+    <div id="loading-spinner" style="display: none;">Cargando...</div>
 </main>
 {{end}}
