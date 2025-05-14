@@ -23,7 +23,7 @@ type Querier interface {
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	ListPhrases(ctx context.Context, offset int32) ([]Phrase, error)
-	ListPhrasesByState(ctx context.Context, state string) ([]Phrase, error)
+	ListPhrasesByState(ctx context.Context, arg ListPhrasesByStateParams) ([]Phrase, error)
 	UpdatePhrase(ctx context.Context, arg UpdatePhraseParams) (Phrase, error)
 	UpdatePhraseState(ctx context.Context, arg UpdatePhraseStateParams) (Phrase, error)
 	UpdatePublishedAt(ctx context.Context, id int64) ([]Phrase, error)

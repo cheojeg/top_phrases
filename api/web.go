@@ -65,12 +65,17 @@ func (server *Server) quotes(ctx *gin.Context) {
 	quotesQuery := []db.Phrase{}
 	var err error
 	if isValidState(state) {
-		quotesQuery, err = server.store.ListPhrasesByState(ctx, state)
+		queryParams := db.ListPhrasesByStateParams{
+			State:  state,
+			Offset: int32(0),
+		}
+		quotesQuery, err = server.store.ListPhrasesByState(ctx, queryParams)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
 		}
 	} else {
+		state = AllState
 		quotesQuery, err = server.store.ListPhrases(ctx, int32(0))
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -89,6 +94,7 @@ func (server *Server) quotes(ctx *gin.Context) {
 		"title":   "Quotes",
 		"Pending": countDraft,
 		"Quotes":  quotes,
+		"State":   state,
 	})
 }
 
@@ -96,16 +102,37 @@ func (server *Server) loadMoreQuotes(ctx *gin.Context) {
 	page := ctx.Query("page")
 	pageNum, _ := strconv.Atoi(page)
 	offset := (pageNum - 1) * 20
-	quotesQuery, err := server.store.ListPhrases(ctx, int32(offset))
+	state := ctx.Query("state")
+
+	var quotesQuery []db.Phrase
+	var err error
+
+	if state == AllState {
+		quotesQuery, err = server.store.ListPhrases(ctx, int32(offset))
+	} else if isValidState(state) {
+		queryParams := db.ListPhrasesByStateParams{
+			State:  state,
+			Offset: int32(offset),
+		}
+		quotesQuery, err = server.store.ListPhrasesByState(ctx, queryParams)
+	} else {
+		ctx.JSON(http.StatusBadRequest, errorResponse(fmt.Errorf("invalid state")))
+		return
+	}
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	quotes := parseQuotes(quotesQuery)
-	ctx.HTML(http.StatusOK, "quotes_partial.html", gin.H{
-		"Quotes": quotes,
-		"Page":   pageNum + 1,
+	hasMore := len(quotes) >= 20
+
+	ctx.HTML(http.StatusOK, "base_htmx", gin.H{
+		"Quotes":  quotes,
+		"Page":    pageNum + 1,
+		"State":   state,
+		"HasMore": hasMore,
 	})
 }
 
@@ -190,7 +217,11 @@ func (server *Server) updateStateQuoteWeb(ctx *gin.Context) {
 }
 
 func (server *Server) inboxQuotes(ctx *gin.Context) {
-	quotesQuery, err := server.store.ListPhrasesByState(ctx, DraftPhraseState)
+	queryParams := db.ListPhrasesByStateParams{
+		State:  DraftPhraseState,
+		Offset: int32(0),
+	}
+	quotesQuery, err := server.store.ListPhrasesByState(ctx, queryParams)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

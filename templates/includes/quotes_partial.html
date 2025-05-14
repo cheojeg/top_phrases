@@ -29,14 +29,16 @@
         </ul>
     </div>
     {{end}}
+    {{if .HasMore}}
+        <div
+                id="load-more-trigger"
+                hx-get="/load_quotes?page={{.Page}}&state={{.State}}"
+                hx-trigger="revealed"
+                hx-swap="beforeend"
+                hx-indicator="#loading-spinner">
+        </div>
 
-    <div
-            id="load-more-trigger"
-            hx-get="/load_quotes?page={{.Page}}"
-            hx-trigger="revealed"
-            hx-swap="beforeend"
-            hx-indicator="#loading-spinner">
-    </div>
+        <div id="loading-spinner" style="display: none;">Cargando...</div>
+    {{end}}
 
-    <div id="loading-spinner" style="display: none;">Cargando...</div>
 {{end}}

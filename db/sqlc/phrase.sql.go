@@ -181,10 +181,16 @@ const listPhrasesByState = `-- name: ListPhrasesByState :many
 SELECT id, owner, state, phrase, author, created_at, published_at
 FROM phrases
 WHERE state = $1
+LIMIT 20 OFFSET $2
 `
 
-func (q *Queries) ListPhrasesByState(ctx context.Context, state string) ([]Phrase, error) {
-	rows, err := q.db.QueryContext(ctx, listPhrasesByState, state)
+type ListPhrasesByStateParams struct {
+	State  string `json:"state"`
+	Offset int32  `json:"offset"`
+}
+
+func (q *Queries) ListPhrasesByState(ctx context.Context, arg ListPhrasesByStateParams) ([]Phrase, error) {
+	rows, err := q.db.QueryContext(ctx, listPhrasesByState, arg.State, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

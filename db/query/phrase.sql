@@ -48,7 +48,8 @@ WHERE state = 'draft';
 -- name: ListPhrasesByState :many
 SELECT *
 FROM phrases
-WHERE state = $1;
+WHERE state = $1
+LIMIT 20 OFFSET $2;
 
 -- name: CountPhrasesPublishedToday :one
 SELECT COUNT(*)

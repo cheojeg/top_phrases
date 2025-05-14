@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	AllState             = "all"
 	DraftPhraseState     = "draft"
 	PublishedPhraseState = "published"
 	ArchivedPhraseState  = "archived"

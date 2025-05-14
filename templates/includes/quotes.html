@@ -1,26 +1,50 @@
 {{define "content"}}
 {{block "sidebar" .}} {{end}}
+<input type="hidden" id="selectedState" value="all">
 <main class="container mx-auto p-4" id="content">
     <div class="flex items-center justify-center py-4 md:py-8 flex-wrap">
-        <button hx-get="/quotes" hx-target="#content" type="button" class="text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800">All</button>
-        <button hx-get="/quotes?state=published" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Published</button>
-        <button hx-get="/quotes?state=draft" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Draft</button>
-        <button hx-get="/quotes?state=archived" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Archived</button>
+<!--        <button hx-get="/quotes" hx-target="#content" type="button" class="text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800">All</button>-->
+<!--        <button hx-get="/quotes?state=published" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Published</button>-->
+<!--        <button hx-get="/quotes?state=draft" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Draft</button>-->
+<!--        <button hx-get="/quotes?state=archived" hx-target="#content" type="button" class="text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800">Archived</button>-->
+
+        <button hx-get="/quotes" hx-target="#content" type="button"
+                class="{{if eq .State "all"}}text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800{{else}}text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800{{end}}">
+        All
+        </button>
+        <button hx-get="/quotes?state=published" hx-target="#content" type="button"
+                class="{{if eq .State "published"}}text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800{{else}}text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800{{end}}">
+        Published
+        </button>
+        <button hx-get="/quotes?state=draft" hx-target="#content" type="button"
+                class="{{if eq .State "draft"}}text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800{{else}}text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800{{end}}">
+        Draft
+        </button>
+        <button hx-get="/quotes?state=archived" hx-target="#content" type="button"
+                class="{{if eq .State "archived"}}text-blue-700 hover:text-white border border-blue-600 bg-white hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:bg-gray-900 dark:focus:ring-blue-800{{else}}text-gray-900 border border-white hover:border-gray-200 dark:border-gray-900 dark:bg-gray-900 dark:hover:border-gray-700 bg-white focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-full text-base font-medium px-5 py-2.5 text-center me-3 mb-3 dark:text-white dark:focus:ring-gray-800{{end}}">
+        Archived
+        </button>
     </div>
     {{range .Quotes}}
         <div class="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-6  mb-3 mt-3">
             <ul class="space-y-4">
                 <li>
-                    {{ if eq .State "draft" }}
-                        <span class="bg-yellow-100 text-yellow-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">Draft</span>
-                    {{ else if eq .State "published" }}
-                        <span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Published</span>
-                    {{ else if eq .State "archived" }}
-                        <span class="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Archived</span>
-                    {{ end }}
+                    <div class="flex items-center justify-between">
+                        <div>
+                            {{ if eq .State "draft" }}
+                            <span class="bg-yellow-100 text-yellow-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">Draft</span>
+                            {{ else if eq .State "published" }}
+                            <span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Published</span>
+                            {{ else if eq .State "archived" }}
+                            <span class="bg-gray-100 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Archived</span>
+                            {{ end }}
+                        </div>
+                        <div>
+                            <a href="/edit_quote/{{.ID}}" class="flex items-center justify-end">✏️ Editar</a>
+                        </div>
+                    </div>
                     <blockquote class="mt-4 text-xl text-gray-700 italic text-center">"{{ .Text }}"</blockquote>
                     <p class="text-lg text-gray-600 text-right">— {{ .Author }}</p>
-                    <a href="/edit_quote/{{.ID}}">Editar</a>
                     <br>
                     <div class="flex justify-end space-x-2">
                         {{ if or (eq .State "published") (eq .State "draft") }}
@@ -44,7 +68,7 @@
 
     <div
             id="load-more-trigger"
-            hx-get="/load_quotes?page=2"
+            hx-get="/load_quotes?page=2&state={{.State}}"
             hx-trigger="revealed"
             hx-swap="beforeend"
             hx-indicator="#loading-spinner">
@@ -52,4 +76,5 @@
 
     <div id="loading-spinner" style="display: none;">Cargando...</div>
 </main>
+
 {{end}}
